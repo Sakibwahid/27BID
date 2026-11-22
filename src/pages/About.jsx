@@ -1,40 +1,23 @@
 import { createElement, useState } from "react";
-import { Text } from "../components/ui/Text";
 import { Button } from "../components/ui/Button";
 import { Anchor } from "../components/ui/Anchor";
-import {
-  Trophy,
-  Radio,
-  Users,
-  Hammer,
-  BarChart3,
-  Shield,
-  Wallet,
-  Gavel,
-  Zap,
-  Target,
-  Crown,
-  Sparkles,
-  ArrowRight,
-  ChevronDown,
-  Search,
-  Flag,
-} from "lucide-react";
 import Reveal from "../components/ui/Reveal";
+import { Radio, Search, Hammer, BarChart3, Shield, Wallet } from "lucide-react";
 
-/* ─────────────────────────────────────────
-   Small section eyebrow label (matches Home)
-───────────────────────────────────────── */
-function Eyebrow({ children }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="w-2 h-2 rounded-full bg-fifa-accent animate-pulse-soft" />
-      <Text className="font-[rajdhani] font-medium text-[11px] uppercase tracking-[0.2em] text-fifa-accent">
-        {children}
-      </Text>
-    </div>
-  );
-}
+/* Shared box language: 2px border + hard offset shadow.
+   The shadow needs ~4px of free space to the right and below. */
+const PANEL =
+  "rounded-2xl border-2 border-fifa-border bg-fifa-surface shadow-[4px_4px_0_0] shadow-fifa-border";
+
+const SECTION_TITLE =
+  "font-[manrope] text-2xl font-semibold tracking-[-0.03em] text-fifa-text sm:text-3xl";
+
+const STATS = [
+  { value: "Ready", label: "Roster setup" },
+  { value: "Built", label: "Auction experience" },
+  { value: "5", label: "Club identities" },
+  { value: "0%", label: "Platform fee" },
+];
 
 const FEATURES = [
   {
@@ -71,58 +54,33 @@ const FEATURES = [
 
 const STEPS = [
   {
-    Icon: Users,
     title: "Create your manager",
     desc: "Sign up and claim your seat at the table.",
   },
   {
-    Icon: Flag,
     title: "Join a club",
     desc: "Pledge to one of five competing teams.",
   },
   {
-    Icon: Gavel,
     title: "Enter the auction",
     desc: "Step into the live room as players go under the hammer.",
   },
   {
-    Icon: Zap,
     title: "Bid in real time",
     desc: "Outbid rivals before the clock runs out.",
   },
   {
-    Icon: Crown,
     title: "Build & win",
     desc: "Assemble your squad and climb the leaderboard.",
   },
 ];
 
 const TEAMS = [
-  { name: "Wolves", color: "#FDB913", code: "WOL", logo: "/logos/Wolves.png" },
-  {
-    name: "Bayern Munich",
-    color: "#DC052D",
-    code: "BAY",
-    logo: "/logos/Bayern.png",
-  },
-  {
-    name: "Manchester City",
-    color: "#6CABDD",
-    code: "MCI",
-    logo: "/logos/City.png",
-  },
-  {
-    name: "Manchester United",
-    color: "#DA291C",
-    code: "MUN",
-    logo: "/logos/United.png",
-  },
-  {
-    name: "Liverpool",
-    color: "#C8102E",
-    code: "LIV",
-    logo: "/logos/Liverpool.png",
-  },
+  { name: "Wolves", code: "WOL", logo: "/logos/Wolves.png" },
+  { name: "Bayern Munich", code: "BAY", logo: "/logos/Bayern.png" },
+  { name: "Manchester City", code: "MCI", logo: "/logos/City.png" },
+  { name: "Manchester United", code: "MUN", logo: "/logos/United.png" },
+  { name: "Liverpool", code: "LIV", logo: "/logos/Liverpool.png" },
 ];
 
 /* ─────────────────────────────────────────
@@ -138,19 +96,15 @@ function TeamBadge({ team }) {
         src={team.logo}
         alt={team.name}
         onError={() => setFailed(true)}
-        className="w-12 h-12 rounded-full object-cover ring-2 ring-white/10 transition-transform duration-300 group-hover:scale-110"
+        className="h-12 w-12 rounded-full border border-fifa-border bg-fifa-elevated object-cover"
       />
     );
   }
 
   return (
     <span
-      className="w-12 h-12 rounded-full flex items-center justify-center font-[orbitron] font-bold text-sm shrink-0 ring-2 ring-white/10 transition-transform duration-300 group-hover:scale-110"
-      style={{
-        backgroundColor: `${team.color}22`,
-        border: `2px solid ${team.color}`,
-        color: team.color,
-      }}
+      aria-hidden="true"
+      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-fifa-border bg-fifa-elevated font-[manrope] text-xs font-semibold text-fifa-text-secondary"
     >
       {team.code}
     </span>
@@ -159,329 +113,217 @@ function TeamBadge({ team }) {
 
 const About = () => {
   return (
-    <div className="relative min-h-screen w-full bg-fifa-bg text-fifa-text overflow-hidden">
-      {/* ambient glows */}
-      <div className="pointer-events-none fixed -top-40 -left-40 w-[520px] h-[520px] bg-fifa-accent/10 rounded-full blur-[130px] animate-drift" />
-      <div className="pointer-events-none fixed bottom-0 right-0 w-[460px] h-[460px] bg-fifa-info/10 rounded-full blur-[130px] animate-drift-slow" />
+    <div className="min-h-screen w-full bg-fifa-bg text-fifa-text">
+      <div className="mx-auto w-full max-w-5xl px-4 pb-16 sm:px-6">
+        {/* ── HERO ── */}
+        <section className="pb-4 pt-12 sm:pt-20">
+          <Reveal>
+            <h1 className="font-[manrope] text-4xl font-semibold leading-[1.05] tracking-[-0.045em] text-fifa-text sm:text-6xl">
+              <span className="text-fifa-text-secondary">Build your squad.</span>
+              <br />
+              Win the bid.
+            </h1>
+          </Reveal>
 
-      {/* ── HERO ── */}
-      <section className="relative max-w-6xl mx-auto px-6 pt-24 md:pt-32 pb-20">
-        <Reveal>
-          <Eyebrow>Auction22 · FIFA22 Platform</Eyebrow>
-        </Reveal>
+          <Reveal delay={80}>
+            <p className="mt-5 max-w-xl text-base leading-7 text-fifa-text-secondary sm:text-lg">
+              Auction22 is a team-based football auction for managers who love a
+              smart signing. Create an account, explore the platform, and build
+              your squad when the roster is ready.
+            </p>
+          </Reveal>
 
-        <Reveal delay={80}>
-          <Text
-            variant="heading"
-            className="font-[orbitron] text-fifa-text text-5xl md:text-7xl leading-[1.05] tracking-tight mt-5"
-          >
-            Build your squad.
-            <br />
-            <span className="text-shimmer">Win the bid.</span>
-          </Text>
-        </Reveal>
+          <Reveal delay={160}>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Anchor to="/signup">
+                <Button size="md" className="rounded-xl shadow-none">
+                  Get started
+                </Button>
+              </Anchor>
+              <Anchor to="/auction">
+                <Button
+                  size="md"
+                  variant="outline"
+                  className="rounded-xl border-fifa-border bg-transparent text-fifa-text shadow-none hover:bg-fifa-surface"
+                >
+                  Explore the auction room
+                </Button>
+              </Anchor>
+            </div>
+          </Reveal>
+        </section>
 
-        <Reveal delay={160}>
-          <Text
-            variant="subheading"
-            className="font-[rajdhani] font-normal text-fifa-text-secondary text-lg md:text-xl max-w-2xl mt-6"
-          >
-            Auction22 is a team-based football auction experience built for
-            managers who love a smart signing. Create your account, explore the
-            platform, and get ready to build a squad when the player roster is
-            added.
-          </Text>
-        </Reveal>
+        {/* ── STATS ── */}
+        <section className="mt-10 sm:mt-12">
+          <Reveal>
+            <dl className={`${PANEL} grid grid-cols-2 sm:grid-cols-4`}>
+              {STATS.map(({ value, label }, i) => (
+                <div
+                  key={label}
+                  className={`border-fifa-border px-3 py-5 text-center ${
+                    i % 2 === 1 ? "border-l" : ""
+                  } ${i >= 2 ? "border-t sm:border-t-0" : ""} ${
+                    i > 0 ? "sm:border-l" : ""
+                  }`}
+                >
+                  <dd className="font-[manrope] text-2xl font-semibold tabular-nums tracking-tight text-fifa-text">
+                    {value}
+                  </dd>
+                  <dt className="mt-1.5 text-[10px] uppercase tracking-[0.12em] text-fifa-text-muted">
+                    {label}
+                  </dt>
+                </div>
+              ))}
+            </dl>
+          </Reveal>
+        </section>
 
-        <Reveal delay={240}>
-          <div className="flex flex-wrap gap-3 mt-9">
-            <Anchor to="/signup">
-              <Button size="md" className="rounded-xl">
-                Get started
-              </Button>
-            </Anchor>
-            <Anchor to="/auction">
-              <Button
-                size="md"
-                variant="outline"
-                className="rounded-xl border-fifa-border text-fifa-text bg-transparent hover:bg-fifa-surface"
-              >
-                Explore the auction room
-              </Button>
-            </Anchor>
-          </div>
-        </Reveal>
-
-        {/* scroll cue */}
-        <Reveal delay={360}>
-          <div className="mt-20 flex flex-col items-center gap-2 text-fifa-text-muted">
-            <span className="font-inter text-[10px] uppercase tracking-[0.3em]">
-              Scroll to explore
-            </span>
-            <ChevronDown className="w-5 h-5 animate-bounce" />
-          </div>
-        </Reveal>
-      </section>
-
-      {/* ── STATS ── */}
-      <section className="relative max-w-6xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-fifa-border rounded-2xl overflow-hidden border border-fifa-border">
-          {[
-            { value: "Ready", label: "Roster setup" },
-            { value: "Built", label: "Auction experience" },
-            { value: "5", label: "Club identities" },
-            { value: "0%", label: "Platform fee" },
-          ].map((s, i) => (
-            <Reveal key={s.label} delay={i * 90}>
-              <div className="bg-fifa-card px-6 py-10 text-center">
-                <Text className="font-[orbitron] font-bold text-fifa-accent text-4xl md:text-5xl">
-                  {s.value}
-                </Text>
-                <Text className="font-inter text-[10px] uppercase tracking-wider text-fifa-text-muted mt-3 block">
-                  {s.label}
-                </Text>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* ── WHAT IT IS ── */}
-      <section className="relative max-w-6xl mx-auto px-6 py-20">
-        <div className="grid md:grid-cols-2 gap-14 items-center">
+        {/* ── ARENA ── */}
+        <section className="mt-14 grid items-center gap-8 sm:mt-20 md:grid-cols-2 md:gap-12">
           <Reveal>
             <div>
-              <Eyebrow>The Arena</Eyebrow>
-              <Text
-                variant="heading"
-                className="font-[orbitron] text-fifa-text text-3xl md:text-5xl mt-4"
-              >
-                One stage. Every star.
-              </Text>
-              <Text
-                variant="para"
-                className="font-[rajdhani] text-fifa-text-secondary text-lg mt-6 leading-relaxed"
-              >
-                Auction22 is designed to turn player trading into a live
-                spectacle. When the roster is ready, managers can compete for
-                signings, shape their squads, and follow the season together.
-              </Text>
-              <div className="flex gap-8 mt-8">
-                <div>
-                  <Text className="font-[rajdhani] font-semibold text-fifa-text text-2xl">
-                    <Target className="inline w-5 h-5 text-fifa-accent mr-2" />
-                    Skill
-                  </Text>
-                  <Text className="font-inter text-[10px] uppercase tracking-wider text-fifa-text-muted mt-1 block">
-                    Read the market
-                  </Text>
-                </div>
-                <div>
-                  <Text className="font-[rajdhani] font-semibold text-fifa-text text-2xl">
-                    <Sparkles className="inline w-5 h-5 text-fifa-accent mr-2" />
-                    Surprise
-                  </Text>
-                  <Text className="font-inter text-[10px] uppercase tracking-wider text-fifa-text-muted mt-1 block">
-                    Steal the bid
-                  </Text>
-                </div>
-              </div>
+              <h2 className={SECTION_TITLE}>One stage. Every star.</h2>
+              <p className="mt-4 max-w-md text-base leading-7 text-fifa-text-secondary">
+                Auction22 turns player trading into a live spectacle. When the
+                roster is ready, managers compete for signings, shape their
+                squads, and follow the season together.
+              </p>
             </div>
           </Reveal>
 
-          <Reveal delay={120}>
-            <div className="relative">
-              <div className="absolute inset-0 bg-fifa-accent/20 blur-2xl rounded-3xl scale-95 animate-float-y" />
-              <div className="relative bg-gradient-to-b from-fifa-elevated to-fifa-card border border-fifa-border rounded-2xl p-6 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)]">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <Text className="font-[orbitron] text-fifa-accent text-3xl leading-none">
-                      91
-                    </Text>
-                    <Text className="font-[rajdhani] font-medium text-fifa-text-secondary text-xs mt-1">
-                      ST
-                    </Text>
-                  </div>
-                  <div className="w-1.5 h-1.5 rounded-full bg-fifa-danger animate-pulse" />
+          <Reveal delay={100}>
+            <div className={PANEL}>
+              <div className="flex items-center gap-3 p-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-fifa-accent font-[manrope] text-lg font-semibold tabular-nums text-fifa-bg">
+                  91
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate font-[manrope] text-[15px] font-medium text-fifa-text">
+                    Star Player
+                  </p>
+                  <p className="mt-0.5 text-xs text-fifa-text-muted">
+                    ST · Reserve 500 credits
+                  </p>
                 </div>
-                <div className="mt-4 h-36 rounded-xl bg-fifa-surface border border-fifa-border/60 flex items-center justify-center">
-                  <Trophy className="w-12 h-12 text-fifa-accent/70 animate-float-y" />
+              </div>
+              <div className="flex items-end justify-between border-t border-fifa-border px-4 py-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.12em] text-fifa-text-muted">
+                    Current bid
+                  </p>
+                  <p className="mt-1 font-[manrope] text-lg font-semibold leading-none tabular-nums text-fifa-text">
+                    1,240
+                  </p>
                 </div>
-                <Text className="font-[rajdhani] font-semibold text-fifa-text text-lg mt-3">
-                  Star Player
-                </Text>
-                <Text className="font-inter text-[10px] uppercase tracking-wider text-fifa-text-muted">
-                  Reserve · 500 credits
-                </Text>
-                <div className="mt-4 flex items-center justify-between bg-fifa-surface border border-fifa-border rounded-xl px-3 py-2">
-                  <div>
-                    <Text className="font-inter text-[9px] uppercase tracking-wider text-fifa-text-muted">
-                      Current Bid
-                    </Text>
-                    <Text className="font-[rajdhani] font-semibold text-fifa-accent text-lg leading-none">
-                      1,240
-                    </Text>
-                  </div>
-                  <Text className="font-[rajdhani] text-xs text-fifa-text-secondary">
-                    04:12 left
-                  </Text>
-                </div>
+                <p className="text-xs tabular-nums text-fifa-text-muted">
+                  04:12 left
+                </p>
               </div>
             </div>
           </Reveal>
-        </div>
-      </section>
+        </section>
 
-      {/* ── FEATURES ── */}
-      <section className="relative max-w-6xl mx-auto px-6 py-20">
-        <Reveal>
-          <Eyebrow>What you get</Eyebrow>
-          <Text
-            variant="heading"
-            className="font-[orbitron] text-fifa-text text-3xl md:text-5xl mt-4"
-          >
-            Everything to run the room
-          </Text>
-        </Reveal>
+        {/* ── FEATURES ── */}
+        <section className="mt-14 sm:mt-20">
+          <Reveal>
+            <h2 className={SECTION_TITLE}>Everything to run the room</h2>
+          </Reveal>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
-          {FEATURES.map(({ Icon, title, desc }, i) => (
-            <Reveal key={title} delay={(i % 3) * 100}>
-              <div className="group h-full bg-gradient-to-b from-fifa-elevated to-fifa-card border border-fifa-border rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-fifa-accent/40 hover:shadow-[0_20px_50px_-20px_rgba(183,255,42,0.25)]">
-                <div className="w-12 h-12 rounded-xl bg-fifa-surface border border-fifa-border flex items-center justify-center mb-5 transition-colors group-hover:border-fifa-accent/50">
-                  {createElement(Icon, {
-                    size: 22,
-                    className:
-                      "text-fifa-accent transition-transform duration-300 group-hover:scale-110",
-                  })}
-                </div>
-                <Text className="font-[rajdhani] font-semibold text-fifa-text text-xl">
-                  {title}
-                </Text>
-                <Text
-                  variant="para"
-                  className="font-[rajdhani] text-fifa-text-secondary text-base mt-2 leading-relaxed"
-                >
-                  {desc}
-                </Text>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS ── */}
-      <section className="relative max-w-6xl mx-auto px-6 py-20">
-        <Reveal>
-          <Eyebrow>The Playbook</Eyebrow>
-          <Text
-            variant="heading"
-            className="font-[orbitron] text-fifa-text text-3xl md:text-5xl mt-4"
-          >
-            How a season flows
-          </Text>
-        </Reveal>
-
-        <div className="grid md:grid-cols-5 gap-5 mt-12">
-          {STEPS.map(({ Icon, title, desc }, i) => (
-            <Reveal key={title} delay={i * 90}>
-              <div className="relative h-full bg-fifa-card border border-fifa-border rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-11 h-11 rounded-xl bg-fifa-surface border border-fifa-border flex items-center justify-center">
-                    {createElement(Icon, {
-                      size: 20,
-                      className: "text-fifa-accent",
-                    })}
-                  </div>
-                  <span className="font-[orbitron] text-fifa-text-muted text-lg">
-                    0{i + 1}
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map(({ Icon, title, desc }, i) => (
+              <Reveal key={title} delay={(i % 3) * 80}>
+                <div className={`${PANEL} flex h-full gap-3 p-4`}>
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-fifa-elevated text-fifa-text-secondary">
+                    {createElement(Icon, { size: 18 })}
                   </span>
-                </div>
-                <Text className="font-[rajdhani] font-semibold text-fifa-text text-lg">
-                  {title}
-                </Text>
-                <Text
-                  variant="para"
-                  className="font-[rajdhani] text-fifa-text-secondary text-sm mt-2"
-                >
-                  {desc}
-                </Text>
-                {i < STEPS.length - 1 && (
-                  <ArrowRight className="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-fifa-border" />
-                )}
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* ── TEAMS ── */}
-      <section className="relative max-w-6xl mx-auto px-6 py-10">
-        <Reveal>
-          <Eyebrow>The Rivals</Eyebrow>
-          <Text
-            variant="heading"
-            className="font-[orbitron] text-fifa-text text-3xl md:text-5xl mt-4"
-          >
-            Five clubs. One crown.
-          </Text>
-        </Reveal>
-
-        <div className="bg-fifa-card border border-fifa-border rounded-2xl px-6 py-6 mt-12">
-          {/* ROW OF LOGOS */}
-          <div className="flex items-center justify-center gap-4 sm:gap-6">
-            {TEAMS.map((team, i) => (
-              <Reveal key={team.name} delay={i * 70}>
-                <div className="group">
-                  <TeamBadge team={team} />
+                  <div className="min-w-0">
+                    <h3 className="font-[manrope] text-[15px] font-medium text-fifa-text">
+                      {title}
+                    </h3>
+                    <p className="mt-1 text-sm leading-6 text-fifa-text-muted">
+                      {desc}
+                    </p>
+                  </div>
                 </div>
               </Reveal>
             ))}
           </div>
+        </section>
 
-          {/* DIVIDER */}
-         
-          
-        </div>
-      </section>
+        {/* ── HOW IT WORKS ── */}
+        <section className="mt-14 sm:mt-20">
+          <Reveal>
+            <h2 className={SECTION_TITLE}>How a season flows</h2>
+          </Reveal>
 
-      {/* ── CTA ── */}
-      <section className="relative max-w-6xl mx-auto px-6 pt-16 pb-28">
-        <Reveal>
-          <div className="relative overflow-hidden bg-gradient-to-b from-fifa-elevated to-fifa-card border border-fifa-border rounded-3xl px-8 py-16 md:py-20 text-center">
-            <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[420px] h-[420px] bg-fifa-accent/20 rounded-full blur-[120px] animate-pulse-soft" />
-            <Text
-              variant="heading"
-              className="relative font-[orbitron] text-fifa-text text-3xl md:text-5xl"
+          <Reveal delay={80}>
+            <ol
+              className={`${PANEL} mt-6 grid divide-y divide-fifa-border md:grid-cols-5 md:divide-x md:divide-y-0`}
             >
-              Ready to build your squad?
-            </Text>
-            <Text
-              variant="subheading"
-              className="relative font-[rajdhani] text-fifa-text-secondary text-lg mt-4 max-w-xl mx-auto"
-            >
-              Join the auction, outbid your rivals, and write your club's name
-              across the leaderboard.
-            </Text>
-            <div className="flex justify-center gap-3 mt-9">
-              <Anchor to="/signup">
-                <Button size="sm" className="rounded-xl text-[12px]">
-                  Create account
-                </Button>
-              </Anchor>
-              <Anchor to="/login">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="rounded-xl text-[12px] border-fifa-border text-fifa-text bg-transparent hover:bg-fifa-surface"
-                >
-                  I already have one
-                </Button>
-              </Anchor>
-            </div>
+              {STEPS.map(({ title, desc }, i) => (
+                <li key={title} className="p-4">
+                  <span className="text-xs tabular-nums text-fifa-text-muted">
+                    0{i + 1}
+                  </span>
+                  <h3 className="mt-2 font-[manrope] text-sm font-medium text-fifa-text">
+                    {title}
+                  </h3>
+                  <p className="mt-1 text-xs leading-5 text-fifa-text-muted">
+                    {desc}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </Reveal>
+        </section>
+
+        {/* ── TEAMS ── */}
+        <section className="mt-14 sm:mt-20">
+          <Reveal>
+            <h2 className={SECTION_TITLE}>Five clubs. One crown.</h2>
+          </Reveal>
+
+          <div
+            className={`${PANEL} mt-6 flex flex-wrap items-start justify-center gap-x-6 gap-y-5 p-5 sm:gap-x-10`}
+          >
+            {TEAMS.map((team, i) => (
+              <Reveal key={team.name} delay={i * 70}>
+                <div className="flex w-20 flex-col items-center gap-2 text-center">
+                  <TeamBadge team={team} />
+                  <span className="text-xs leading-4 text-fifa-text-muted">
+                    {team.name}
+                  </span>
+                </div>
+              </Reveal>
+            ))}
           </div>
-        </Reveal>
-      </section>
+        </section>
+
+        {/* ── CTA ── */}
+        <section className="mt-14 sm:mt-20">
+          <Reveal>
+            <div className={`${PANEL} px-6 py-10 text-center sm:py-12`}>
+              <h2 className={SECTION_TITLE}>Ready to build your squad?</h2>
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <Anchor to="/signup">
+                  <Button size="sm" className="rounded-xl text-[12px] shadow-none">
+                    Create account
+                  </Button>
+                </Anchor>
+                <Anchor to="/login">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-xl border-fifa-border bg-transparent text-[12px] text-fifa-text shadow-none hover:bg-fifa-surface"
+                  >
+                    I already have one
+                  </Button>
+                </Anchor>
+              </div>
+            </div>
+          </Reveal>
+        </section>
+      </div>
     </div>
   );
 };
