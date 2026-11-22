@@ -2,12 +2,21 @@ import { useState } from "react";
 import { User } from "lucide-react";
 
 const STATS = [
-  { label: "PAC", key: "Acceleration", csvKey: "movement_acceleration" },
-  { label: "SHO", key: "ShotPower", csvKey: "power_shot_power" },
-  { label: "PAS", key: "ShortPassing", csvKey: "attacking_short_passing" },
-  { label: "DRI", key: "Dribbling", csvKey: "skill_dribbling" },
-  { label: "DEF", key: "StandingTackle", csvKey: "defending_standing_tackle" },
-  { label: "PHY", key: "Strength", csvKey: "power_strength" },
+  { label: "PAC", title: "Pace", key: "Acceleration", csvKey: "movement_acceleration" },
+  { label: "SHO", title: "Shooting", key: "ShotPower", csvKey: "power_shot_power" },
+  { label: "PAS", title: "Passing", key: "ShortPassing", csvKey: "attacking_short_passing" },
+  { label: "DRI", title: "Dribbling", key: "Dribbling", csvKey: "skill_dribbling" },
+  { label: "DEF", title: "Defending", key: "StandingTackle", csvKey: "defending_standing_tackle" },
+  { label: "PHY", title: "Physicality", key: "Strength", csvKey: "power_strength" },
+];
+
+const GOALKEEPER_STATS = [
+  { label: "DIV", title: "GK Diving", key: "GKDiving", csvKey: "goalkeeping_diving" },
+  { label: "HAN", title: "GK Handling", key: "GKHandling", csvKey: "goalkeeping_handling" },
+  { label: "KIC", title: "GK Kicking", key: "GKKicking", csvKey: "goalkeeping_kicking" },
+  { label: "REF", title: "GK Reflexes", key: "GKReflexes", csvKey: "goalkeeping_reflexes" },
+  { label: "POS", title: "GK Positioning", key: "GKPositioning", csvKey: "goalkeeping_positioning" },
+  { label: "REA", title: "Reactions", key: "Reactions", csvKey: "movement_reactions" },
 ];
 
 const getValue = (...values) =>
@@ -32,6 +41,8 @@ const PlayerCard = ({ player, onClick }) => {
     "Unknown player";
   const position = getValue(player?.Position, player?.position) || "—";
   const overall = getValue(player?.Overall, player?.overall) ?? "—";
+  const stats =
+    String(position).toUpperCase() === "GK" ? GOALKEEPER_STATS : STATS;
   const photoFailed = failedId === playerId;
   const Tag = onClick ? "button" : "div";
 
@@ -67,9 +78,12 @@ const PlayerCard = ({ player, onClick }) => {
         </div>
 
         <dl className="mt-1.5 grid grid-cols-6 gap-1 text-center">
-          {STATS.map(({ label, key, csvKey }) => (
+          {stats.map(({ label, title, key, csvKey }) => (
             <div key={key} className="flex flex-col-reverse">
-              <dt className="mt-1 text-[9px] font-medium uppercase leading-none tracking-[0.1em] text-fifa-text-muted">
+              <dt
+                title={title}
+                className="mt-1 text-[9px] font-medium uppercase leading-none tracking-[0.1em] text-fifa-text-muted"
+              >
                 {label}
               </dt>
               <dd className="text-sm font-normal leading-none tabular-nums text-fifa-text">
