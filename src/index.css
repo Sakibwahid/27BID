@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:wght@400;700&family=Space+Grotesk:wght@300;400;500;700&family=DM+Sans:wght@300;400;500;700&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;400;700&family=Exo:wght@300;400;700&family=Quantico:wght@400;700&family=Montserrat:wght@300;400;700&family=Manrope:wght@300;400;700&family=Poppins:wght@300;400;500;700&family=Urbanist:wght@300;400;700&family=Cinzel:wght@400;700&family=Abril+Fatface&family=Sora:ital,wght@0,300;0,400;0,700;1,300;1,500;1,700&display=swap');
+@import "tailwindcss";
+
+@theme {
+
+--color-fifa-primary: #07F468;
+--color-fifa-secondary: #171A29;
+--color-fifa-accent: #07F468;
+--color-fifa-accent-hover: #00D95B;
+--color-fifa-accent-active: #00B94D;
+
+--color-fifa-bg: #0C0C0C;
+--color-fifa-surface: #151616;
+--color-fifa-card: #191B1B;
+--color-fifa-elevated: #242626;
+--color-fifa-border: #343737;
+
+--color-fifa-text: #E7E7E3;
+--color-fifa-text-secondary: #C4C5C2;
+--color-fifa-text-muted: #858783;
+
+--color-fifa-success: #07F468;
+--color-fifa-warning: #F5B942;
+--color-fifa-danger: #F05252;
+--color-fifa-info: #4C9BFF;
+
+
+  --font-playfair: "Playfair Display", serif;
+  --font-lora: "Lora", serif;
+  --font-inter: "Inter", sans-serif;
+  --font-orbitron: "Orbitron", sans-serif;
+  --font-rajdhani: "Rajdhani", sans-serif;
+  --font-exo: "Exo", sans-serif;
+  --font-quantico: "Quantico", sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
+  --font-manrope: "Manrope", sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+  --font-urbanist: "Urbanist", sans-serif;
+  --font-cinzel: "Cinzel", serif;
+  --font-abril: "Abril Fatface", serif;
+  --font-sora: "Sora", sans-serif;
+  --font-spaceGrotesk: "Space Grotesk", sans-serif;
+  --font-dmSans: "DM Sans", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--color-fifa-bg);
+  color: var(--color-fifa-text);
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: var(--color-fifa-accent);
+  color: #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .home-headline-line-delayed {
+    animation-delay: 0ms !important;
+  }
+}
+
+@keyframes headline-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.home-headline-line {
+  animation: headline-enter 850ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.home-headline-line-delayed {
+  animation: headline-enter 850ms cubic-bezier(0.2, 0.8, 0.2, 1) 160ms both;
+}
+
+@keyframes drift {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(45px, -35px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes drift-slow {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(-40px, 30px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.85; }
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+.animate-drift { animation: drift 16s ease-in-out infinite; }
+.animate-drift-slow { animation: drift-slow 24s ease-in-out infinite; }
+.animate-pulse-soft { animation: pulse-soft 3.5s ease-in-out infinite; }
+.animate-float-y { animation: float-y 6s ease-in-out infinite; }
+
+.text-shimmer {
+  background: linear-gradient(90deg, #892FED 0%, #E50081 50%, #892FED 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 6s linear infinite;
+}
