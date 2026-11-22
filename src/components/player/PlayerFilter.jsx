@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { collection, query, getDocs, limit } from "firebase/firestore";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Mars, UsersRound, Venus } from "lucide-react";
 
 import { db } from "../../lib/firebase/config";
 import { Button } from "../ui/Button";
@@ -19,6 +19,11 @@ const CATEGORIES = [
 ];
 
 const OVERALLS = ["95", "85", "80"];
+const GENDER_FILTERS = [
+  { value: "male", label: "Men" },
+  { value: "female", label: "Women" },
+  { value: "all", label: "All" },
+];
 
 /* App stat key -> alternate key used by some imported datasets */
 const STAT_ALIASES = {
@@ -78,6 +83,7 @@ const PlayerFilter = ({
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [sortHighToLow, setSortHighToLow] = useState(true);
+  const [genderFilter, setGenderFilter] = useState("male");
 
   const listScrollRef = useRef(null);
 
@@ -132,6 +138,16 @@ const PlayerFilter = ({
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
     return allPlayers
+      .filter((player) => {
+        if (genderFilter === "all") return true;
+
+        const gender = String(player.gender ?? player.Gender ?? "").toLowerCase();
+        const isFemale =
+          gender.includes("female") || gender.includes("women");
+        return genderFilter === "female"
+          ? isFemale
+          : !isFemale && (gender.includes("male") || gender.includes("men"));
+      })
       .filter((p) => !category || p.Position === category)
       .filter(
         (p) =>
@@ -144,7 +160,14 @@ const PlayerFilter = ({
       .sort((a, b) =>
         sortHighToLow ? b.Overall - a.Overall : a.Overall - b.Overall,
       );
-  }, [allPlayers, category, maxOverall, searchTerm, sortHighToLow]);
+  }, [
+    allPlayers,
+    category,
+    genderFilter,
+    maxOverall,
+    searchTerm,
+    sortHighToLow,
+  ]);
 
   const updateParam = (key, value) => {
     const params = new URLSearchParams(searchParams);
@@ -156,10 +179,23 @@ const PlayerFilter = ({
     navigate("/player-details", { state: { player } });
   };
 
+  const currentGenderIndex = GENDER_FILTERS.findIndex(
+    ({ value }) => value === genderFilter,
+  );
+  const nextGenderFilter =
+    GENDER_FILTERS[(currentGenderIndex + 1) % GENDER_FILTERS.length];
+  const currentGenderLabel = GENDER_FILTERS[currentGenderIndex].label;
+  const GenderIcon =
+    genderFilter === "male"
+      ? Mars
+      : genderFilter === "female"
+        ? Venus
+        : UsersRound;
+
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="mb-2 flex shrink-0 items-center justify-between gap-3">
-        <div className="flex gap-2">
+      <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap gap-2">
           <select
             value={category}
             onChange={(e) => updateParam("category", e.target.value)}
@@ -185,6 +221,17 @@ const PlayerFilter = ({
               </option>
             ))}
           </select>
+
+          <Button
+            type="button"
+            onClick={() => setGenderFilter(nextGenderFilter.value)}
+            aria-label={`Showing ${currentGenderLabel.toLowerCase()} players. Switch to ${nextGenderFilter.label.toLowerCase()}.`}
+            title={`Gender: ${currentGenderLabel}`}
+            className="min-w-10 px-2.5 sm:px-4 rounded-xl border border-fifa-border bg-fifa-surface text-fifa-text-secondary shadow-none hover:bg-fifa-elevated"
+          >
+            <GenderIcon className="h-4 w-4" aria-hidden="true" />
+            <span className="hidden sm:inline">{currentGenderLabel}</span>
+          </Button>
         </div>
 
         <Button
