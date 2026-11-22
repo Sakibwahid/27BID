@@ -1,10 +1,9 @@
-import { createElement, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { db } from "../../lib/firebase/config";
 import { Button } from "../ui/Button";
 import Loadin from "../ui/loadin";
-import { Crown, Medal, Percent, Trophy } from "lucide-react";
 
 const TEAM_SHORT_NAMES = {
   "Wolverhampton Wanderers F.C.": "Wolves",
@@ -14,7 +13,16 @@ const TEAM_SHORT_NAMES = {
   "Liverpool F.C.": "Liverpool",
 };
 
+const SEASONS = ["S3", "S4", "S5"];
 const teamShort = (name) => TEAM_SHORT_NAMES[name] || name;
+
+/* Shared box language: 2px border + hard offset shadow.
+   The shadow needs ~4px of free space to the right and below. */
+const PANEL =
+  "rounded-2xl border-2 border-fifa-border bg-fifa-surface shadow-[4px_4px_0_0] shadow-fifa-border";
+
+const SECTION_TITLE =
+  "mb-2 px-0.5 text-[11px] uppercase tracking-[0.16em] text-fifa-text-muted";
 
 const sortTeams = (a, b) => {
   if ((b.totalPoints || 0) !== (a.totalPoints || 0))
@@ -28,7 +36,7 @@ const sortTeams = (a, b) => {
   return (a.zeroCounts || 0) - (b.zeroCounts || 0);
 };
 
-function ClubLogo({ name, size = "h-10 w-10" }) {
+function ClubLogo({ name, size = "h-9 w-9" }) {
   const short = teamShort(name);
   const [failed, setFailed] = useState(false);
 
@@ -46,7 +54,7 @@ function ClubLogo({ name, size = "h-10 w-10" }) {
 
   return (
     <span
-      className={`${size} flex shrink-0 items-center justify-center rounded-full border border-fifa-border bg-fifa-bg text-xs font-semibold text-fifa-accent`}
+      className={`${size} flex shrink-0 items-center justify-center rounded-full border border-fifa-border bg-fifa-bg text-[10px] text-fifa-text-secondary`}
       aria-hidden="true"
     >
       {short.slice(0, 3).toUpperCase()}
@@ -54,11 +62,30 @@ function ClubLogo({ name, size = "h-10 w-10" }) {
   );
 }
 
-const TournamentStats = ({ selectedSeason = "S3" }) => {
+const TournamentStats = ({
+  selectedSeason: selectedSeasonProp,
+  onSeasonChange,
+}) => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const seasonParam = searchParams.get("season");
+  const selectedSeason =
+    selectedSeasonProp ||
+    (SEASONS.includes(seasonParam || "") ? seasonParam : "S4");
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const handleSeasonChange = (season) => {
+    if (onSeasonChange) {
+      onSeasonChange(season);
+      return;
+    }
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("season", season);
+    setSearchParams(nextParams);
+  };
 
   useEffect(() => {
     const fetchTeams = async () => {
@@ -147,88 +174,122 @@ const TournamentStats = ({ selectedSeason = "S3" }) => {
 
   if (loading) {
     return (
-      <div className="flex min-h-64 items-center justify-center rounded-2xl border border-fifa-border bg-fifa-surface">
-        <Loadin>Loading standings...</Loadin>
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+        <div
+          className={`${PANEL} flex min-h-64 items-center justify-center`}
+        >
+          <Loadin>Loading standings...</Loadin>
+        </div>
       </div>
     );
   }
 
   const summary = [
-    { label: "Tournaments played", value: stats.tournaments, Icon: Trophy },
+    { label: "Tournaments played", value: stats.tournaments },
     {
       label: "Most finals won",
       value: stats.finalsWon,
       team: stats.finalsWonTeam,
-      Icon: Crown,
     },
     {
       label: "Most finals played",
       value: stats.finalsPlayed,
       team: stats.finalsPlayedTeam,
-      Icon: Medal,
     },
     {
       label: "Best final win rate",
       value: `${stats.bestRate}%`,
       team: stats.bestRateTeam,
-      Icon: Percent,
     },
   ];
 
   return (
-    <section className="w-full rounded-2xl border border-fifa-border bg-fifa-surface p-4 sm:p-6">
-      <header className="flex flex-col gap-4 border-b border-fifa-border pb-5 sm:flex-row sm:items-end sm:justify-between">
+    <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+      {/* ---------- Header ---------- */}
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-fifa-accent">
-            League table · {selectedSeason}
-          </p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-fifa-text sm:text-3xl">
+          <h1 className="font-[manrope] text-2xl font-semibold tracking-[-0.03em] text-fifa-text sm:text-3xl">
             Tournament standings
           </h1>
+          <p className="mt-1 text-xs text-fifa-text-muted">
+            League table · {selectedSeason}
+          </p>
         </div>
-        <Button
-          size="sm"
-          onClick={() =>
-            navigate(`/tournamentresults?season=${selectedSeason}`)
-          }
-          className="min-h-10 rounded-lg shadow-none"
-        >
-          View results
-        </Button>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div
+            role="group"
+            aria-label="Select season"
+            className="inline-flex rounded-xl border border-fifa-border bg-fifa-surface p-1"
+          >
+            {SEASONS.map((season) => (
+              <button
+                key={season}
+                type="button"
+                aria-pressed={selectedSeason === season}
+                onClick={() => handleSeasonChange(season)}
+                className={`h-8 rounded-lg px-3 text-xs font-medium transition ${
+                  selectedSeason === season
+                    ? "bg-fifa-accent text-fifa-bg"
+                    : "text-fifa-text-secondary hover:bg-fifa-elevated hover:text-fifa-text"
+                }`}
+              >
+                {season}
+              </button>
+            ))}
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              navigate(`/tournamentresults?season=${selectedSeason}`)
+            }
+            className="h-10 w-fit shrink-0 whitespace-nowrap rounded-xl shadow-none"
+          >
+            Detailed
+          </Button>
+        </div>
       </header>
 
-      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {summary.map(({ label, value, team, Icon }) => (
-          <article
+      {/* ---------- Summary strip ---------- */}
+      <dl
+        className={`${PANEL} mt-5 grid grid-cols-2 lg:grid-cols-4`}
+      >
+        {summary.map(({ label, value, team }, i) => (
+          <div
             key={label}
-            className="flex min-h-20 items-center gap-3 rounded-xl border border-fifa-border bg-fifa-bg/30 p-4"
+            className={`min-w-0 border-fifa-border px-3 py-3 sm:px-4 ${
+              i % 2 === 1 ? "border-l" : ""
+            } ${i >= 2 ? "border-t lg:border-t-0" : ""} ${
+              i > 0 ? "lg:border-l" : ""
+            }`}
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-fifa-border bg-fifa-surface text-fifa-accent">
-              {createElement(Icon, { size: 16 })}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-fifa-text-muted">
-                {label}
-              </p>
+            <dt className="truncate text-[10px] uppercase tracking-[0.12em] text-fifa-text-muted">
+              {label}
+            </dt>
+            <dd className="mt-1.5 flex items-baseline gap-2">
+              <span className="font-[manrope] text-lg font-semibold leading-none tabular-nums text-fifa-text">
+                {value}
+              </span>
               {team && (
-                <p className="mt-1 truncate text-sm font-medium text-fifa-text">
+                <span className="truncate text-xs text-fifa-text-muted">
                   {teamShort(team)}
-                </p>
+                </span>
               )}
-            </div>
-            <p className="shrink-0 text-xl font-semibold text-fifa-accent">
-              {value}
-            </p>
-          </article>
+            </dd>
+          </div>
         ))}
-      </div>
+      </dl>
 
       {error ? (
-        <p role="alert" className="mt-6 rounded-xl border border-fifa-danger/25 bg-fifa-danger/[0.05] p-4 text-sm text-fifa-danger">
+        <p
+          role="alert"
+          className="mt-6 rounded-xl border border-fifa-danger/25 bg-fifa-danger/[0.05] p-4 text-sm text-fifa-danger"
+        >
           {error}
         </p>
       ) : teams.length === 0 ? (
-        <div className="mt-6 rounded-xl border border-dashed border-fifa-border px-5 py-10 text-center">
+        <div className="mt-6 rounded-2xl border-2 border-dashed border-fifa-border bg-fifa-surface px-5 py-10 text-center">
           <p className="text-sm font-medium text-fifa-text">No standings yet</p>
           <p className="mt-2 text-xs text-fifa-text-muted">
             Standings will appear here after tournament results are recorded.
@@ -236,12 +297,11 @@ const TournamentStats = ({ selectedSeason = "S3" }) => {
         </div>
       ) : (
         <>
-          <section className="mt-7">
-            <h2 className="mb-3 text-sm font-semibold text-fifa-text">
-              Current standings
-            </h2>
-            <div className="overflow-hidden rounded-xl border border-fifa-border">
-              <div className="grid grid-cols-[2.5rem_minmax(0,1fr)_4.5rem] gap-3 bg-fifa-bg/50 px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-fifa-text-muted sm:grid-cols-[3rem_minmax(0,1fr)_minmax(7rem,0.6fr)_5rem] sm:px-4">
+          {/* ---------- Table ---------- */}
+          <section className="mt-6">
+            <h2 className={SECTION_TITLE}>Current standings</h2>
+            <div className={`${PANEL} overflow-hidden`}>
+              <div className="grid grid-cols-[2.5rem_minmax(0,1fr)_4.5rem] gap-3 bg-fifa-elevated px-3 py-2.5 text-[10px] uppercase tracking-wider text-fifa-text-muted sm:grid-cols-[3rem_minmax(0,1fr)_minmax(7rem,0.6fr)_5rem] sm:px-4">
                 <span>Rank</span>
                 <span>Club</span>
                 <span className="hidden sm:block">Points</span>
@@ -253,13 +313,14 @@ const TournamentStats = ({ selectedSeason = "S3" }) => {
                   ((team.totalPoints || 0) / stats.maxPoints) * 100,
                   3
                 );
+                const isLeader = index === 0 && (team.totalPoints || 0) > 0;
 
                 return (
                   <div
                     key={team.name}
-                    className="grid grid-cols-[2.5rem_minmax(0,1fr)_4.5rem] items-center gap-3 border-t border-fifa-border px-3 py-3 sm:grid-cols-[3rem_minmax(0,1fr)_minmax(7rem,0.6fr)_5rem] sm:px-4"
+                    className="grid grid-cols-[2.5rem_minmax(0,1fr)_4.5rem] items-center gap-3 border-t border-fifa-border px-3 py-2.5 sm:grid-cols-[3rem_minmax(0,1fr)_minmax(7rem,0.6fr)_5rem] sm:px-4"
                   >
-                    <span className="text-sm font-medium text-fifa-text-muted">
+                    <span className="text-sm tabular-nums text-fifa-text-muted">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <div className="flex min-w-0 items-center gap-3">
@@ -268,7 +329,7 @@ const TournamentStats = ({ selectedSeason = "S3" }) => {
                         <p className="truncate text-sm font-medium text-fifa-text">
                           {teamShort(team.name)}
                         </p>
-                        <p className="mt-1 truncate text-[10px] text-fifa-text-muted">
+                        <p className="mt-0.5 truncate text-[10px] text-fifa-text-muted">
                           1st {team.firstCount || 0} · 2nd{" "}
                           {team.secondCounts || 0} · 3rd {team.thirdCount || 0}
                         </p>
@@ -281,16 +342,24 @@ const TournamentStats = ({ selectedSeason = "S3" }) => {
                         aria-valuenow={team.totalPoints || 0}
                         aria-valuemin={0}
                         aria-valuemax={stats.maxPoints}
-                        className="h-1.5 overflow-hidden rounded-full bg-fifa-bg"
+                        className="h-1.5 overflow-hidden rounded-full bg-fifa-elevated"
                       >
                         <div
-                          className="h-full rounded-full bg-fifa-accent"
+                          className="h-full rounded-full bg-fifa-text-secondary"
                           style={{ width: `${percent}%` }}
                         />
                       </div>
                     </div>
-                    <p className="text-right text-base font-semibold text-fifa-text">
-                      {team.totalPoints || 0}
+                    <p className="text-right">
+                      <span
+                        className={
+                          isLeader
+                            ? "inline-block min-w-9 rounded-lg bg-fifa-accent px-2 py-0.5 text-center font-[manrope] text-sm font-semibold tabular-nums text-fifa-bg"
+                            : "font-[manrope] text-sm font-semibold tabular-nums text-fifa-text"
+                        }
+                      >
+                        {team.totalPoints || 0}
+                      </span>
                     </p>
                   </div>
                 );
@@ -298,28 +367,32 @@ const TournamentStats = ({ selectedSeason = "S3" }) => {
             </div>
           </section>
 
-          <section className="mt-7">
-            <h2 className="mb-3 text-sm font-semibold text-fifa-text">
-              Points by club
-            </h2>
-            <div className="flex h-56 items-end gap-3 rounded-xl border border-fifa-border bg-fifa-bg/30 px-3 pb-3 pt-5 sm:gap-5 sm:px-5">
-              {teams.map((team) => {
+          {/* ---------- Chart ---------- */}
+          <section className="mt-6">
+            <h2 className={SECTION_TITLE}>Points by club</h2>
+            <div
+              className={`${PANEL} flex h-48 items-end gap-3 px-3 pb-3 pt-4 sm:gap-5 sm:px-5`}
+            >
+              {teams.map((team, index) => {
                 const height = Math.max(
                   ((team.totalPoints || 0) / stats.maxPoints) * 100,
                   2
                 );
+                const isLeader = index === 0 && (team.totalPoints || 0) > 0;
 
                 return (
                   <div
                     key={team.name}
                     className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"
                   >
-                    <span className="text-xs font-medium text-fifa-text">
+                    <span className="text-xs tabular-nums text-fifa-text-secondary">
                       {team.totalPoints || 0}
                     </span>
-                    <div className="flex h-36 w-full items-end overflow-hidden rounded-t-md bg-fifa-surface">
+                    <div className="flex h-28 w-full items-end overflow-hidden rounded-t-md bg-fifa-elevated">
                       <div
-                        className="w-full rounded-t-md bg-fifa-accent"
+                        className={`w-full rounded-t-md ${
+                          isLeader ? "bg-fifa-accent" : "bg-fifa-text-secondary"
+                        }`}
                         style={{ height: `${height}%` }}
                       />
                     </div>
@@ -333,7 +406,7 @@ const TournamentStats = ({ selectedSeason = "S3" }) => {
           </section>
         </>
       )}
-    </section>
+    </main>
   );
 };
 

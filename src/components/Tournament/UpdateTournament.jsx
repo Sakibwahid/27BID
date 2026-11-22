@@ -24,7 +24,7 @@ const SEASONS = ["S3", "S4", "S5"];
 
 const UpdateTournament = () => {
   const [placements, setPlacements] = useState({});
-  const [selectedSeason, setSelectedSeason] = useState("S3");
+  const [selectedSeason, setSelectedSeason] = useState("S4");
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -301,6 +301,7 @@ const UpdateTournament = () => {
         <TournamentStats
           key={refreshKey}
           selectedSeason={selectedSeason}
+          onSeasonChange={handleSeasonChange}
         />
       </div>
     </main>

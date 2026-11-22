@@ -1,14 +1,11 @@
-import React, { useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowUpRight,
-  CircleDot,
   Info,
   LogOut,
-  Menu,
   Trophy,
+  UsersRound,
   UserRound,
-  X,
 } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "../../lib/firebase/config";
@@ -27,27 +24,17 @@ const desktopLinkClass = ({ isActive }) =>
       : "text-fifa-text-secondary hover:bg-fifa-elevated hover:text-fifa-text"
   }`;
 
-const mobileLinkClass = ({ isActive }) =>
-  `flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition ${
-    isActive
-      ? "bg-fifa-accent/10 text-fifa-accent"
-      : "text-fifa-text-secondary hover:bg-fifa-elevated hover:text-fifa-text"
-  }`;
-
 export function Navbar() {
-  const [mobileMenu, setMobileMenu] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { user, userData } = useAuth();
   const dashboardPath = userData?.role === "admin" ? "/admin" : "/user";
+  const homePath = user ? dashboardPath : "/";
   const isHomePage = pathname === "/";
-
-  const closeMenu = () => setMobileMenu(false);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      closeMenu();
       navigate("/login");
     } catch (error) {
       console.error("Logout Error:", error);
@@ -55,14 +42,14 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-fifa-border bg-fifa-surface text-fifa-text backdrop-blur-xl">
+    <>
+    <header className="sticky top-0 z-50 hidden border-b border-fifa-border bg-fifa-surface/80 text-fifa-text backdrop-blur-xl md:block">
       <nav
         className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6"
         aria-label="Main navigation"
       >
         <Link
-          to="/"
-          onClick={closeMenu}
+          to={homePath}
           className="group flex shrink-0 items-center gap-3"
           aria-label="Auction22 home"
         >
@@ -73,17 +60,20 @@ export function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">
-          {links.map(({ to, label, Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === "/"}
-              className={desktopLinkClass}
-            >
-              {Icon && <Icon size={15} />}
-              {label}
-            </NavLink>
-          ))}
+          {links.map(({ to, label, Icon }) => {
+            const target = to === "/" ? homePath : to;
+            return (
+              <NavLink
+                key={to}
+                to={target}
+                end={to === "/"}
+                className={desktopLinkClass}
+              >
+                {Icon && <Icon size={15} />}
+                {label}
+              </NavLink>
+            );
+          })}
           {user && (
             <NavLink to="/user/squad" className={desktopLinkClass}>
               <UserRound size={15} />
@@ -131,87 +121,71 @@ export function Navbar() {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setMobileMenu((open) => !open)}
-          aria-label={mobileMenu ? "Close menu" : "Open menu"}
-          aria-expanded={mobileMenu}
-          aria-controls="mobile-navigation"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-fifa-border text-fifa-text-secondary transition hover:bg-fifa-elevated hover:text-fifa-text md:hidden"
-        >
-          {mobileMenu ? <X size={20} /> : <Menu size={20} />}
-        </button>
       </nav>
-
-      {mobileMenu && (
-        <div
-          id="mobile-navigation"
-          className="border-t border-fifa-border bg-fifa-surface px-4 pb-5 pt-3 md:hidden"
-        >
-          <div className="mx-auto flex max-w-7xl flex-col gap-1">
-            {links.map(({ to, label, Icon }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={to === "/"}
-                onClick={closeMenu}
-                className={mobileLinkClass}
-              >
-                {Icon && <Icon size={17} />}
-                {label}
-              </NavLink>
-            ))}
-            {user ? (
-              <>
-                <NavLink
-                  to="/user/squad"
-                  onClick={closeMenu}
-                  className={mobileLinkClass}
-                >
-                  <UserRound size={17} /> Squad
-                </NavLink>
-                <Link
-                  to={dashboardPath}
-                  onClick={closeMenu}
-                  className="rounded-xl px-4 py-3 text-sm text-fifa-text-secondary hover:bg-fifa-elevated hover:text-fifa-text"
-                >
-                  Dashboard
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-fifa-text-secondary hover:bg-fifa-elevated hover:text-fifa-text"
-                >
-                  <LogOut size={17} /> Sign out
-                </button>
-              </>
-            ) : (
-              <div
-                className={`mt-2 grid gap-3 border-t border-fifa-border pt-4 ${
-                  isHomePage ? "grid-cols-1" : "grid-cols-2"
-                }`}
-              >
-                <Link
-                  to="/login"
-                  onClick={closeMenu}
-                  className="rounded-full border border-fifa-border px-4 py-3 text-center text-sm text-fifa-text"
-                >
-                  Sign in
-                </Link>
-                {!isHomePage && (
-                  <Link
-                    to="/signup"
-                    onClick={closeMenu}
-                    className="rounded-full bg-fifa-accent px-4 py-3 text-center text-sm font-semibold text-fifa-bg"
-                  >
-                    Get started
-                  </Link>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </header>
+    <nav
+      aria-label="Mobile navigation"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-fifa-border/80 bg-fifa-surface/75 pb-[env(safe-area-inset-bottom)] text-fifa-text shadow-[0_-8px_24px_rgba(0,0,0,0.2)] backdrop-blur-xl md:hidden"
+    >
+      <div className="mx-auto flex h-16 max-w-lg items-stretch px-2">
+        <NavLink
+          to={homePath}
+          end
+          aria-label="Home"
+          className={({ isActive }) =>
+            `flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 transition ${
+              isActive
+                ? "text-fifa-accent"
+                : "text-fifa-text-secondary hover:text-fifa-text"
+            }`
+          }
+        >
+          <span className="font-[orbitron] text-xl font-bold tracking-[0.08em]">
+            22
+          </span>
+          <span className="sr-only">Home</span>
+        </NavLink>
+        <NavLink
+          to="/auction"
+          aria-label="Auction"
+          className={({ isActive }) =>
+            `flex min-w-0 flex-1 items-center justify-center transition ${
+              isActive
+                ? "text-fifa-accent"
+                : "text-fifa-text-secondary hover:text-fifa-text"
+            }`
+          }
+        >
+          <Trophy size={22} aria-hidden="true" />
+        </NavLink>
+        <NavLink
+          to="/user/squad"
+          aria-label="Squad"
+          className={({ isActive }) =>
+            `flex min-w-0 flex-1 items-center justify-center transition ${
+              isActive
+                ? "text-fifa-accent"
+                : "text-fifa-text-secondary hover:text-fifa-text"
+            }`
+          }
+        >
+          <UsersRound size={22} aria-hidden="true" />
+        </NavLink>
+        <NavLink
+          to="/about"
+          aria-label="About"
+          className={({ isActive }) =>
+            `flex min-w-0 flex-1 items-center justify-center transition ${
+              isActive
+                ? "text-fifa-accent"
+                : "text-fifa-text-secondary hover:text-fifa-text"
+            }`
+          }
+        >
+          <Info size={22} aria-hidden="true" />
+        </NavLink>
+      </div>
+    </nav>
+    </>
   );
 }

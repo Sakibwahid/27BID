@@ -2,13 +2,16 @@ import { useState } from "react";
 import { User } from "lucide-react";
 
 const STATS = [
-  { label: "PAC", key: "Acceleration" },
-  { label: "SHO", key: "ShotPower" },
-  { label: "PAS", key: "ShortPassing" },
-  { label: "DRI", key: "Dribbling" },
-  { label: "DEF", key: "StandingTackle" },
-  { label: "PHY", key: "Strength" },
+  { label: "PAC", key: "Acceleration", csvKey: "movement_acceleration" },
+  { label: "SHO", key: "ShotPower", csvKey: "power_shot_power" },
+  { label: "PAS", key: "ShortPassing", csvKey: "attacking_short_passing" },
+  { label: "DRI", key: "Dribbling", csvKey: "skill_dribbling" },
+  { label: "DEF", key: "StandingTackle", csvKey: "defending_standing_tackle" },
+  { label: "PHY", key: "Strength", csvKey: "power_strength" },
 ];
+
+const getValue = (...values) =>
+  values.find((value) => value !== undefined && value !== null && value !== "");
 
 /* Hard offset shadow takes its color from the token via shadow-fifa-border.
    Needs ~4px of free space to the right and below so it isn't clipped. */
@@ -20,7 +23,16 @@ const INTERACTIVE =
 
 const PlayerCard = ({ player, onClick }) => {
   const [failedId, setFailedId] = useState(null);
-  const photoFailed = failedId === player.ID;
+  const playerId = String(player?.ID ?? player?.id ?? "").trim();
+  const playerName =
+    player?.Name?.trim() ||
+    player?.name?.trim() ||
+    player?.common_name?.trim() ||
+    [player?.first_name, player?.last_name].filter(Boolean).join(" ") ||
+    "Unknown player";
+  const position = getValue(player?.Position, player?.position) || "—";
+  const overall = getValue(player?.Overall, player?.overall) ?? "—";
+  const photoFailed = failedId === playerId;
   const Tag = onClick ? "button" : "div";
 
   return (
@@ -34,10 +46,10 @@ const PlayerCard = ({ player, onClick }) => {
           <User size={20} aria-hidden="true" />
         ) : (
           <img
-            src={`/player_photos/${player.ID}.png`}
-            alt={player.Name}
+            src={`/player_photos/${playerId}.png`}
+            alt={playerName}
             loading="lazy"
-            onError={() => setFailedId(player.ID)}
+            onError={() => setFailedId(playerId)}
             className="h-full w-full object-cover object-top"
           />
         )}
@@ -47,21 +59,21 @@ const PlayerCard = ({ player, onClick }) => {
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
           <p className="truncate font-[manrope] text-[15px] font-semibold tracking-tight text-fifa-text">
-            {player.Name}
+            {playerName}
           </p>
           <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-fifa-text-muted">
-            {player.Position}
+            {position}
           </span>
         </div>
 
         <dl className="mt-1.5 grid grid-cols-6 gap-1 text-center">
-          {STATS.map(({ label, key }) => (
+          {STATS.map(({ label, key, csvKey }) => (
             <div key={key} className="flex flex-col-reverse">
               <dt className="mt-1 text-[9px] font-medium uppercase leading-none tracking-[0.1em] text-fifa-text-muted">
                 {label}
               </dt>
               <dd className="text-sm font-normal leading-none tabular-nums text-fifa-text">
-                {player[key] ?? "—"}
+                {getValue(player?.[key], player?.[csvKey]) ?? "—"}
               </dd>
             </div>
           ))}
@@ -70,10 +82,10 @@ const PlayerCard = ({ player, onClick }) => {
 
       {/* Overall */}
       <span
-        aria-label={`Overall ${player.Overall}`}
+        aria-label={`Overall ${overall}`}
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-fifa-accent font-[manrope] text-lg font-bold tabular-nums text-fifa-bg"
       >
-        {player.Overall}
+        {overall}
       </span>
     </Tag>
   );

@@ -8,7 +8,15 @@ import { useAuth } from "../context/AuthContext";
 import { Anchor } from "../components/ui/Anchor";
 import Loadin from "../components/ui/loadin";
 
-import { ArrowUpRight, BarChart3, Gavel, Shield, Users } from "lucide-react";
+import {
+  ArrowUpRight,
+  BarChart3,
+  Gavel,
+  LogOut,
+  Shield,
+  Users,
+} from "lucide-react";
+import { logoutUser } from "../lib/firebase/auth";
 
 const STANDINGS_CACHE_KEY = "standings_cache_v1";
 const CACHE_MAX_AGE_MS = 1000 * 60 * 5;
@@ -134,6 +142,16 @@ const UserDashboard = () => {
     );
   }, [standings, normalizedUserTeam]);
 
+  const handleSignOut = async () => {
+    const result = await logoutUser();
+    if (!result.success) {
+      console.error("Logout failed:", result.error);
+      return;
+    }
+
+    navigate("/login", { replace: true });
+  };
+
   /* ---------------- LOADING LOGIC ---------------- */
   if (authLoading || (!userData && !ready)) {
     return (
@@ -154,12 +172,26 @@ const UserDashboard = () => {
 
       <div className="mx-auto max-w-6xl">
         {/* ---------- Greeting ---------- */}
-        <h1
-          className="dash-rise font-[manrope] text-lg font-medium tracking-tight text-fifa-text-secondary sm:text-xl"
+        <div
+          className="dash-rise flex items-center justify-between gap-4"
           style={delay(0)}
         >
-          Welcome back, {userData?.username || "Manager"}.
-        </h1>
+          <h1 className="font-[manrope] text-lg font-medium tracking-tight text-fifa-text-secondary sm:text-xl">
+            Welcome back, {userData?.username || "Manager"}.
+          </h1>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            aria-label="Sign out"
+            title="Sign out"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full border border-fifa-border text-fifa-text-secondary transition hover:border-fifa-danger/50 hover:text-fifa-danger sm:w-auto sm:px-4"
+          >
+            <LogOut size={17} aria-hidden="true" />
+            <span className="hidden text-sm font-medium sm:inline">
+              Sign out
+            </span>
+          </button>
+        </div>
 
         {/* ---------- Club standing (primary) ---------- */}
         <section

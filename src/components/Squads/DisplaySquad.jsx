@@ -74,6 +74,7 @@ const SELECT_CLASS =
 
 const squadCache = new Map();
 let squadUnsub = null;
+let directSquadUnsub = null;
 
 const sumValue = (list) =>
   list.reduce((acc, p) => acc + (Number(p.soldPrice) || 0), 0);
@@ -126,7 +127,7 @@ function PlayerPhoto({ playerId, name, size = "h-10 w-10" }) {
 /* One cell of the summary strip */
 const Metric = ({ label, value, valueClass = "text-fifa-text" }) => (
   <div className="min-w-0 px-2 py-2.5 text-center">
-    <dt className="truncate text-[9px] font-medium uppercase tracking-[0.12em] text-fifa-text-muted">
+    <dt className="truncate text-[10px] uppercase tracking-[0.12em] text-fifa-text-muted">
       {label}
     </dt>
     <dd
@@ -269,14 +270,6 @@ const DisplaySquad = () => {
     }, {});
   }, [players]);
 
-  const groupedValues = useMemo(() => {
-    const vals = {};
-    Object.entries(grouped).forEach(([pos, list]) => {
-      vals[pos] = sumValue(list);
-    });
-    return vals;
-  }, [grouped]);
-
   /* ---------------- AUTH GUARD ---------------- */
   if (!userData) {
     return (
@@ -334,6 +327,7 @@ const DisplaySquad = () => {
 
               <Button
                 size="sm"
+                variant="outline"
                 onClick={() => setViewMode(viewMode === "list" ? "squad" : "list")}
                 className="h-10 shrink-0 whitespace-nowrap rounded-xl shadow-none"
               >
@@ -387,7 +381,7 @@ const DisplaySquad = () => {
             {players.length === 0 && (
               <Reveal>
                 <div className="rounded-2xl border-2 border-dashed border-fifa-border bg-fifa-surface px-5 py-10 text-center">
-                  <h2 className="font-[manrope] text-base font-semibold text-fifa-text">
+                  <h2 className="font-[manrope] text-base font-medium text-fifa-text">
                     No players in this squad yet
                   </h2>
                   <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-fifa-text-muted">
@@ -411,20 +405,10 @@ const DisplaySquad = () => {
                 delay={Math.min(POSITIONS.indexOf(pos) * 50, 300)}
               >
                 <section>
-                  <div className="mb-2 flex items-center gap-3 px-0.5">
-                    <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-fifa-text-muted">
-                      <span className="text-fifa-text">{pos}</span> ·{" "}
-                      {list.length} player{list.length === 1 ? "" : "s"}
-                    </h2>
-                    <span className="inline-flex items-baseline gap-1.5 rounded-lg border border-fifa-border bg-fifa-elevated px-2 py-0.5">
-                      <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-fifa-text-muted">
-                        Total
-                      </span>
-                      <span className="text-xs font-semibold tabular-nums text-fifa-text">
-                        {groupedValues[pos]}M
-                      </span>
-                    </span>
-                  </div>
+                  <h2 className="mb-2 px-0.5 text-[11px] uppercase tracking-[0.16em] text-fifa-text-muted">
+                    <span className="font-medium text-fifa-text">{pos}</span> ·{" "}
+                    {list.length} player{list.length === 1 ? "" : "s"}
+                  </h2>
 
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     {list.map((p) => (
@@ -445,17 +429,17 @@ const DisplaySquad = () => {
                           name={p.Name}
                         />
 
-                        <span className="min-w-0 flex-1 truncate font-[manrope] text-[15px] font-semibold tracking-tight text-fifa-text">
+                        <span className="min-w-0 flex-1 truncate font-[manrope] text-[15px] font-medium tracking-tight text-fifa-text">
                           {p.Name}
                         </span>
 
-                        <span className="w-14 shrink-0 text-right text-sm font-medium tabular-nums text-fifa-text-secondary">
+                        <span className="w-14 shrink-0 text-right text-sm tabular-nums text-fifa-text-secondary">
                           {p.soldPrice ?? "—"}M
                         </span>
 
                         <span
                           aria-label={`Overall ${p.Overall}`}
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fifa-accent font-[manrope] text-sm font-bold tabular-nums text-fifa-bg"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fifa-accent font-[manrope] text-sm font-semibold tabular-nums text-fifa-bg"
                         >
                           {p.Overall}
                         </span>

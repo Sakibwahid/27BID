@@ -50,7 +50,7 @@ function App() {
         <Router>
           <div className="min-h-screen bg-fifa-bg text-fifa-text">
             <Navbar />
-            <main className="relative min-h-[calc(100vh-4.5rem)] w-full">
+            <main className="relative mt-0 min-h-screen w-full pb-20 md:mt-4 md:min-h-[calc(100vh-4.5rem)] md:pb-0">
               <Suspense
                 fallback={
                   <div className="min-h-screen flex items-center justify-center bg-fifa-bg">
