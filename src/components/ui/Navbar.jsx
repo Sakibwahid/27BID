@@ -3,9 +3,9 @@ import {
   ArrowUpRight,
   Info,
   LogOut,
+  Search,
   Trophy,
   UsersRound,
-  UserRound,
 } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "../../lib/firebase/config";
@@ -14,6 +14,8 @@ import { useAuth } from "../../context/AuthContext";
 const links = [
   { to: "/", label: "Home" },
   { to: "/auction", label: "Auction", Icon: Trophy },
+  { to: "/user/squad", label: "Squad", Icon: UsersRound, authenticatedOnly: true },
+  { to: "/players", label: "Player market", Icon: Search },
   { to: "/about", label: "About", Icon: Info },
 ];
 
@@ -60,7 +62,9 @@ export function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">
-          {links.map(({ to, label, Icon }) => {
+          {links
+            .filter(({ authenticatedOnly }) => !authenticatedOnly || user)
+            .map(({ to, label, Icon }) => {
             const target = to === "/" ? homePath : to;
             return (
               <NavLink
@@ -74,12 +78,6 @@ export function Navbar() {
               </NavLink>
             );
           })}
-          {user && (
-            <NavLink to="/user/squad" className={desktopLinkClass}>
-              <UserRound size={15} />
-              Squad
-            </NavLink>
-          )}
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
@@ -170,6 +168,19 @@ export function Navbar() {
           }
         >
           <UsersRound size={22} aria-hidden="true" />
+        </NavLink>
+        <NavLink
+          to="/players"
+          aria-label="Player market"
+          className={({ isActive }) =>
+            `flex min-w-0 flex-1 items-center justify-center transition ${
+              isActive
+                ? "text-fifa-accent"
+                : "text-fifa-text-secondary hover:text-fifa-text"
+            }`
+          }
+        >
+          <Search size={22} aria-hidden="true" />
         </NavLink>
         <NavLink
           to="/about"
