@@ -13,6 +13,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
 const UserDashboard = lazy(() => import("./pages/UserDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminUpdateUsers = lazy(() => import("./pages/AdminUpdateUsers"));
 const Players = lazy(() => import("./pages/Players"));
 const PlayerDetails = lazy(() => import("./components/player/PlayerDetails"));
 const AuctionSection = lazy(() => import("./components/auction/AuctionSection"));
@@ -48,9 +49,21 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router>
-          <div className="min-h-screen bg-fifa-bg text-fifa-text">
+          <div className="relative isolate min-h-screen overflow-hidden bg-fifa-bg text-fifa-text">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none fixed left-[-12rem] top-[-10rem] z-0 h-[34rem] w-[34rem] rounded-full bg-fifa-accent/[0.10] blur-[110px]"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none fixed right-[-14rem] top-[18%] z-0 h-[30rem] w-[30rem] rounded-full bg-fifa-info/[0.08] blur-[120px]"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none fixed bottom-[-16rem] left-[35%] z-0 h-[32rem] w-[32rem] rounded-full bg-fifa-accent/[0.055] blur-[130px]"
+            />
             <Navbar />
-            <main className="relative mt-0 min-h-screen w-full pb-20 md:mt-4 md:min-h-[calc(100vh-4.5rem)] md:pb-0">
+            <main className="relative z-0 mt-0 min-h-screen w-full pb-20 md:mt-4 md:min-h-[calc(100vh-4.5rem)] md:pb-0">
               <Suspense
                 fallback={
                   <div className="min-h-screen flex items-center justify-center bg-fifa-bg">
@@ -71,6 +84,10 @@ function App() {
                   <Route
                     path="/admin"
                     element={withRole(["admin"], AdminDashboard)}
+                  />
+                  <Route
+                    path="/admin/update-users"
+                    element={withRole(["admin"], AdminUpdateUsers)}
                   />
                   <Route
                     path="/players"

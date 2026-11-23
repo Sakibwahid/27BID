@@ -12,6 +12,7 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { db } from "../../lib/firebase/config";
+import { getRegisteredTeams } from "../../lib/teams";
 import { Button } from "../ui/Button";
 import { Text } from "../ui/Text";
 import PlayerCardDemo from "../player/PlayerCardDemo";
@@ -28,14 +29,6 @@ const POSITIONS = [
   "RW",
   "CF",
   "ST",
-];
-
-const TEAMS = [
-  { id: "wolves01", name: "Wolves", color: "#FDB913" },
-  { id: "bayern05", name: "Bayern Munich", color: "#FFFFFF" },
-  { id: "city04", name: "Manchester City", color: "#6CABDD" },
-  { id: "paris03", name: "Paris Saint-Germain", color: "#f507da" },
-  { id: "liverpool01", name: "Liverpool", color: "#C8102E" },
 ];
 
 const STORAGE_KEY = "auction_state_v3";
@@ -64,9 +57,41 @@ const AdminAuctionControl = () => {
   const [seasonId, setSeasonId] = useState("S4");
   const [soldFlash, setSoldFlash] = useState(null);
   const [recentSold, setRecentSold] = useState([]);
+  const [registeredTeams, setRegisteredTeams] = useState([]);
+  const [teamsLoading, setTeamsLoading] = useState(true);
+  const [teamsLoadError, setTeamsLoadError] = useState("");
 
   // Keep ref to unsubscribe the live listener on unmount
   const unsubRef = useRef(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadRegisteredTeams = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "users"));
+        const teams = getRegisteredTeams(
+          snapshot.docs.map((userDoc) => userDoc.data()),
+        );
+        if (active) {
+          setRegisteredTeams(teams);
+          setTeamsLoadError("");
+        }
+      } catch (error) {
+        console.error("Failed to load registered teams:", error);
+        if (active) {
+          setTeamsLoadError("Registered teams could not be loaded.");
+        }
+      } finally {
+        if (active) setTeamsLoading(false);
+      }
+    };
+
+    loadRegisteredTeams();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   /* ─────────────────────────────────────────
      LIVE LISTENER — currentPlayer/active
@@ -257,6 +282,11 @@ const AdminAuctionControl = () => {
 
   const handleSell = () => {
     if (!currentPlayer || !selectedTeam || !prices[selectedTeam]) return;
+    if (!registeredTeams.some((team) => team.id === selectedTeam)) {
+      console.error("handleSell abort: selected team is not registered", selectedTeam);
+      alert("Select a registered team before confirming the sale.");
+      return;
+    }
     if (!currentPlayer.ID) {
       console.error("handleSell abort: currentPlayer is missing ID", currentPlayer);
       alert("Player ID missing. Please choose a new player and try again.");
@@ -320,6 +350,11 @@ const AdminAuctionControl = () => {
   };
 
   const canSell = !!(selectedTeam && prices[selectedTeam] && currentPlayer);
+  const selectedTeamIsRegistered = registeredTeams.some(
+    (team) => team.id === selectedTeam,
+  );
+  const canConfirmSale =
+    canSell && selectedTeamIsRegistered && !teamsLoading && !teamsLoadError;
   const availablePlayerCount = Object.values(availablePlayers).reduce(
     (total, players) => total + players.length,
     0
@@ -474,7 +509,19 @@ const AdminAuctionControl = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            {TEAMS.map((team) => {
+            {teamsLoadError ? (
+              <p role="alert" className="text-sm text-fifa-danger">
+                {teamsLoadError}
+              </p>
+            ) : teamsLoading ? (
+              <p className="text-sm text-fifa-text-muted">
+                Loading registered teams...
+              </p>
+            ) : registeredTeams.length === 0 ? (
+              <p className="text-sm text-fifa-text-muted">
+                No registered teams are available.
+              </p>
+            ) : registeredTeams.map((team) => {
               const isSelected = selectedTeam === team.id;
               const justSold = soldFlash === team.id;
               return (
@@ -530,9 +577,9 @@ const AdminAuctionControl = () => {
 
           <button
             onClick={handleSell}
-            disabled={!canSell}
+            disabled={!canConfirmSale}
             className={`mt-4 min-h-11 w-full rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
-              !canSell
+              !canConfirmSale
                 ? "cursor-not-allowed border border-fifa-border bg-fifa-bg/40 text-fifa-text-muted"
                 : "bg-fifa-accent text-fifa-bg hover:bg-fifa-accent-hover"
             }`}
@@ -557,7 +604,10 @@ const AdminAuctionControl = () => {
               </div>
             ) : (
               recentSold.map((player) => {
-                const team = TEAMS.find((t) => t.id === player.currentTeamId);
+                const team = registeredTeams.find(
+                  (registeredTeam) =>
+                    registeredTeam.id === player.currentTeamId,
+                );
                 return (
                   <div
                     key={player.id}

@@ -11,6 +11,8 @@ const TEAM_SHORT_NAMES = {
   "Manchester City F.C.": "Man City",
   "Paris Saint-Germain F.C.": "PSG",
   "Liverpool F.C.": "Liverpool",
+  "Chelsea F.C.": "Chelsea",
+  "Real Madrid C.F.": "Real Madrid",
 };
 
 const SEASONS = ["S3", "S4", "S5"];

@@ -12,6 +12,7 @@ import {
 import { User } from "lucide-react";
 
 import { db } from "../../lib/firebase/config";
+import { getTeamIdForUser } from "../../lib/teams";
 import { useAuth } from "../../context/AuthContext";
 
 import Loadin from "../ui/loadin";
@@ -53,21 +54,21 @@ const POSITIONS = [
   "ST",
 ];
 
-const OTHER_TEAMS = [
-  { id: "wolves01", name: "Wolves" },
-  { id: "bayern05", name: "Bayern Munich" },
+const SQUAD_TEAMS = [
   { id: "city04", name: "Manchester City" },
+  { id: "realmadrid01", name: "Real Madrid" },
+  { id: "bayern05", name: "Bayern Munich" },
+  { id: "chelsea01", name: "Chelsea" },
   { id: "paris03", name: "Paris Saint-Germain" },
-  { id: "liverpool01", name: "Liverpool" },
 ];
 
 /* Shared box language (same as PlayerCard): 2px border + hard offset shadow.
    The shadow needs ~4px of free space to the right and below. */
 const PANEL =
-  "rounded-2xl border-2 border-fifa-border bg-fifa-surface shadow-[4px_4px_0_0] shadow-fifa-border";
+  "surface-glow rounded-2xl border-2 border-fifa-border";
 
 const PANEL_INTERACTIVE =
-  "transition duration-150 hover:-translate-x-px hover:-translate-y-px hover:shadow-[5px_5px_0_0] active:translate-x-1 active:translate-y-1 active:shadow-[0_0_0_0]";
+  "surface-glow-interactive hover:-translate-x-px hover:-translate-y-px active:translate-x-1 active:translate-y-1";
 
 const SELECT_CLASS =
   "h-10 rounded-xl border border-fifa-border bg-fifa-surface px-3 text-sm text-fifa-text outline-none transition focus:border-fifa-accent";
@@ -142,11 +143,15 @@ const DisplaySquad = () => {
   const navigate = useNavigate();
   const { userData } = useAuth();
 
-  const userTeamId = userData?.teamId || null;
+  const userTeamId = getTeamIdForUser(userData);
   const [players, setPlayers] = useState([]);
   const [seasonId, setSeasonId] = useState("S4");
   const [teamOverride, setTeamOverride] = useState(null);
-  const selectedTeamId = teamOverride || userTeamId;
+  const selectedTeamId =
+    teamOverride ||
+    (SQUAD_TEAMS.some((team) => team.id === userTeamId)
+      ? userTeamId
+      : null);
   const [viewMode, setViewMode] = useState("list");
 
   /* ---------------- FETCH SQUAD ---------------- */
@@ -290,8 +295,16 @@ const DisplaySquad = () => {
     navigate("/player-details", { state: { player } });
 
   return (
-    <main className="min-h-screen w-full overflow-x-hidden bg-fifa-bg text-fifa-text">
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+    <main className="relative isolate min-h-screen w-full overflow-x-hidden bg-fifa-bg text-fifa-text">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-[8%] top-20 -z-10 h-64 w-64 rounded-full bg-fifa-accent/[0.035] blur-[90px]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-[5%] top-[38%] -z-10 h-72 w-72 rounded-full bg-fifa-info/[0.025] blur-[100px]"
+      />
+      <div className="relative mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
         {/* ---------- Header ---------- */}
         <Reveal>
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -313,14 +326,17 @@ const DisplaySquad = () => {
 
               <select
                 value={selectedTeamId || ""}
-                onChange={(e) => setTeamOverride(e.target.value)}
+                onChange={(e) => setTeamOverride(e.target.value || null)}
                 aria-label="Select club"
                 className={`${SELECT_CLASS} min-w-0 flex-1 sm:w-44 sm:flex-none`}
               >
-                {userTeamId && <option value={userTeamId}>Your Squad</option>}
-                {OTHER_TEAMS.map((team) => (
+                <option value="" disabled>
+                  Select team
+                </option>
+                {SQUAD_TEAMS.map((team) => (
                   <option key={team.id} value={team.id} className="bg-fifa-card">
                     {team.name}
+                    {team.id === userTeamId ? " (Your Squad)" : ""}
                   </option>
                 ))}
               </select>

@@ -16,10 +16,12 @@ const TEAM_META = {
   "Manchester City F.C.": { short: "Man City", logo: "/logos/City.png" },
   "Paris Saint-Germain F.C.": { short: "PSG", logo: "/logos/PSG.png" },
   "Liverpool F.C.": { short: "Liverpool", logo: "/logos/Liverpool.png" },
+  "Chelsea F.C.": { short: "Chelsea", logo: "/logos/Chelsea.png" },
+  "Real Madrid C.F.": { short: "Real Madrid", logo: "/logos/Real Madrid.png" },
 };
 
 const TEAMS = Object.keys(TEAM_META);
-const POSITIONS = ["1st", "2nd", "3rd", "4th", "5th"];
+const POSITIONS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th"];
 const SEASONS = ["S3", "S4", "S5"];
 
 const UpdateTournament = () => {
@@ -39,6 +41,8 @@ const UpdateTournament = () => {
         return { totalPoints: increment(1), thirdCount: increment(1) };
       case "4th":
       case "5th":
+      case "6th":
+      case "7th":
         return { zeroCounts: increment(1) };
       default:
         return {};

@@ -10,6 +10,18 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../lib/firebase/config";
 
+const TEAM_IDS = {
+  "FC Bayern Munich": "bayern05",
+  "Manchester City F.C.": "city04",
+  "Wolverhampton Wanderers F.C.": "wolves01",
+  "Liverpool FC": "liverpool01",
+  "Manchester United F.C.": "united03",
+  "Paris Saint-Germain F.C.": "paris03",
+  "Chelsea F.C.": "chelsea01",
+  "Arsenal F.C.": "arsenal01",
+  "Real Madrid C.F.": "realmadrid01",
+};
+
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,6 +49,7 @@ const Signup = () => {
         email,
         username,
         teamName,
+        teamId: TEAM_IDS[teamName] || null,
         role: "user",
         isApproved: false,
         createdAt: serverTimestamp(),
@@ -101,6 +114,7 @@ const Signup = () => {
               <option value="Liverpool FC">Liverpool FC</option>
               <option value="Manchester United F.C.">Manchester United F.C.</option>
               <option value="Paris Saint-Germain F.C.">Paris Saint-Germain F.C.</option>
+              <option value="Chelsea F.C.">Chelsea F.C.</option>
               <option value="Arsenal F.C.">Arsenal F.C.</option>
               <option value="Real Madrid C.F.">Real Madrid C.F.</option>
             </select>

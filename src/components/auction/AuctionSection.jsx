@@ -8,8 +8,10 @@ const TEAMS = [
   { id: "wolves01", name: "Wolves" },
   { id: "bayern05", name: "Bayern Munich" },
   { id: "city04", name: "Manchester City" },
-  { id: "united03", name: "Manchester United" },
+  { id: "paris03", name: "Paris Saint-Germain" },
   { id: "liverpool01", name: "Liverpool" },
+  { id: "chelsea01", name: "Chelsea" },
+  { id: "realmadrid01", name: "Real Madrid" },
 ];
 
 const CurrentAuctionPanel = ({ currentPlayer, loading }) => {

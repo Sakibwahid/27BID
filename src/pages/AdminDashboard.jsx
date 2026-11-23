@@ -1,12 +1,16 @@
 import { createElement } from "react";
+import { useNavigate } from "react-router-dom";
 import { Anchor } from "../components/ui/Anchor";
 import {
   ArrowUpRight,
   Database,
   Gavel,
+  LogOut,
+  Medal,
   ShieldCheck,
   Trophy,
 } from "lucide-react";
+import { logoutUser } from "../lib/firebase/auth";
 
 const workflow = [
   {
@@ -27,6 +31,14 @@ const workflow = [
   },
   {
     step: "03",
+    to: "/admin/update-users",
+    label: "Update users",
+    description: "Add title-history achievements to user profiles.",
+    Icon: Medal,
+    action: "Manage achievements",
+  },
+  {
+    step: "04",
     to: "/admin/updatetournament",
     label: "Tournament results",
     description: "Update club standings and record tournament outcomes.",
@@ -36,6 +48,18 @@ const workflow = [
 ];
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    const result = await logoutUser();
+    if (!result.success) {
+      console.error("Logout failed:", result.error);
+      return;
+    }
+
+    navigate("/login", { replace: true });
+  };
+
   return (
     <div className="min-h-screen bg-fifa-bg px-4 py-8 text-fifa-text sm:px-7 sm:py-12 lg:px-10">
       <div className="mx-auto max-w-6xl">
@@ -55,16 +79,28 @@ const AdminDashboard = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 self-start rounded-2xl border border-fifa-border bg-fifa-surface px-4 py-3 sm:self-auto">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-fifa-elevated text-fifa-text-secondary">
-              <Database size={18} />
-            </span>
-            <div>
-              <p className="text-sm font-medium text-fifa-text">Player market</p>
-              <p className="mt-0.5 text-xs text-fifa-text-muted">
-                Ready for your roster
-              </p>
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            <div className="flex items-center gap-3 rounded-2xl border border-fifa-border bg-fifa-surface px-4 py-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-fifa-elevated text-fifa-text-secondary">
+                <Database size={18} />
+              </span>
+              <div>
+                <p className="text-sm font-medium text-fifa-text">Player market</p>
+                <p className="mt-0.5 text-xs text-fifa-text-muted">
+                  Ready for your roster
+                </p>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              aria-label="Sign out"
+              title="Sign out"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-fifa-border bg-fifa-surface text-fifa-text-secondary transition hover:border-fifa-danger/50 hover:text-fifa-danger sm:w-auto sm:px-4"
+            >
+              <LogOut size={17} aria-hidden="true" />
+              <span className="hidden text-sm sm:inline">Sign out</span>
+            </button>
           </div>
         </header>
 
@@ -109,7 +145,7 @@ const AdminDashboard = () => {
             </span>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-3 md:gap-4">
+          <div className="grid gap-3 md:grid-cols-2 md:gap-4 xl:grid-cols-4">
             {workflow.map(({ step, to, label, description, Icon, action }) => (
               <Anchor
                 key={to}

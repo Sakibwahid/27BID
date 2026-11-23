@@ -12,11 +12,20 @@ const TEAM_SHORT_NAMES = {
   "Manchester City F.C.": "Man City",
   "Paris Saint-Germain F.C.": "PSG",
   "Liverpool F.C.": "Liverpool",
+  "Chelsea F.C.": "Chelsea",
+  "Real Madrid C.F.": "Real Madrid",
 };
 
 const teamShort = (name) => TEAM_SHORT_NAMES[name] || name;
 const POSITIONS = ["1st", "2nd", "3rd", "4th", "5th"];
-const POINTS_FOR = { "1st": 3, "2nd": 2, "3rd": 1, "4th": 0, "5th": 0 };
+const POINTS_FOR = {
+  "1st": 3,
+  "2nd": 2,
+  "3rd": 1,
+  "4th": 0,
+  "5th": 0,
+  
+};
 const SEASONS = ["S3", "S4", "S5"];
 
 /* Shared box language: 2px border + hard offset shadow.
@@ -205,7 +214,7 @@ const TournamentResults = () => {
                   </time>
                 </header>
 
-                <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-7 sm:gap-2">
                   {POSITIONS.map((position) => {
                     const teamName =
                       Object.entries(results).find(

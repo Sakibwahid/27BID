@@ -3,6 +3,7 @@ import {
   ArrowUpRight,
   Info,
   LogOut,
+  Medal,
   Search,
   Trophy,
   UsersRound,
@@ -183,8 +184,8 @@ export function Navbar() {
           <Search size={22} aria-hidden="true" />
         </NavLink>
         <NavLink
-          to="/about"
-          aria-label="About"
+          to="/tournamentstats"
+          aria-label="Tournament standings"
           className={({ isActive }) =>
             `flex min-w-0 flex-1 items-center justify-center transition ${
               isActive
@@ -193,7 +194,7 @@ export function Navbar() {
             }`
           }
         >
-          <Info size={22} aria-hidden="true" />
+          <Medal size={22} aria-hidden="true" />
         </NavLink>
       </div>
     </nav>
