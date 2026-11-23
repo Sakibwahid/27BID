@@ -1,29 +1,71 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:wght@400;700&family=Space+Grotesk:wght@300;400;500;700&family=DM+Sans:wght@300;400;500;700&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;400;700&family=Exo:wght@300;400;700&family=Quantico:wght@400;700&family=Montserrat:wght@300;400;700&family=Manrope:wght@300;400;700&family=Poppins:wght@300;400;500;700&family=Urbanist:wght@300;400;700&family=Cinzel:wght@400;700&family=Abril+Fatface&family=Sora:ital,wght@0,300;0,400;0,700;1,300;1,500;1,700&display=swap');
 @import "tailwindcss";
 
+:root {
+
+  --fifa-grad-start: #1b2fb8;
+  --fifa-grad-mid: #0a6f96; 
+  --fifa-grad-end: #0b8f6e;
+}
+
+body {
+  background-color: var(--color-fifa-bg);
+  color: var(--color-fifa-text);
+}
+
+/* Fixed gradient layer (a pseudo-element, because
+   background-attachment: fixed is unreliable on iOS) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    /* light streaks */
+    linear-gradient(118deg, transparent 44%, rgb(255 255 255 / 0.1) 50%, transparent 56%),
+    linear-gradient(118deg, transparent 62%, rgb(255 255 255 / 0.07) 65%, transparent 69%),
+    /* soft green glow, bottom right */
+    radial-gradient(60% 45% at 88% 100%, rgb(110 255 170 / 0.3), transparent 70%),
+    /* darkening layer so text stays readable */
+    linear-gradient(rgb(4 10 30 / 0.3), rgb(4 10 30 / 0.3)),
+    /* main gradient */
+    linear-gradient(
+      135deg,
+      var(--fifa-grad-start) 0%,
+      var(--fifa-grad-mid) 48%,
+      var(--fifa-grad-end) 100%
+    );
+}
+
+/* Page roots use bg-fifa-bg. Make that transparent so the gradient
+   shows through (text-fifa-bg and bg-fifa-bg/50 are unaffected). */
+.bg-fifa-bg {
+  background-color: transparent;
+}
+
 @theme {
 
---color-fifa-primary: #07F468;
---color-fifa-secondary: #171A29;
---color-fifa-accent: #07F468;
---color-fifa-accent-hover: #00D95B;
---color-fifa-accent-active: #00B94D;
+--color-fifa-primary: #7dffb3;
+--color-fifa-secondary: #0a1b3d;
+--color-fifa-accent: #7dffb3;
+--color-fifa-accent-hover: #5cf59a;
+--color-fifa-accent-active: #3ddb80;
 
---color-fifa-bg: #0C0C0C;
---color-fifa-surface: #151616;
---color-fifa-card: #191B1B;
---color-fifa-elevated: #242626;
---color-fifa-border: #343737;
+--color-fifa-bg: #071433;
+--color-fifa-surface: #0c1f45;
+--color-fifa-card: #102650;
+--color-fifa-elevated: #17316a;
+--color-fifa-border: #ffffff33;
 
---color-fifa-text: #E7E7E3;
---color-fifa-text-secondary: #C4C5C2;
---color-fifa-text-muted: #858783;
+--color-fifa-text: #ffffff;
+--color-fifa-text-secondary: #dae5f9;
+--color-fifa-text-muted: #b2c3e6;
 
---color-fifa-success: #07F468;
---color-fifa-warning: #F5B942;
---color-fifa-danger: #F05252;
---color-fifa-info: #4C9BFF;
-
+--color-fifa-success: #7dffb3;
+--color-fifa-warning: #ffc857;
+--color-fifa-danger: #ff6b6b;
+--color-fifa-info: #6cb6ff;
 
   --font-playfair: "Playfair Display", serif;
   --font-lora: "Lora", serif;
@@ -56,10 +98,18 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background: var(--color-fifa-bg);
+  background:
+    radial-gradient(ellipse at 12% 8%, rgba(7, 244, 104, 0.09), transparent 24rem),
+    radial-gradient(ellipse at 88% 28%, rgba(76, 155, 255, 0.055), transparent 22rem),
+    radial-gradient(ellipse at 50% 100%, rgba(7, 244, 104, 0.035), transparent 30rem),
+    var(--color-fifa-bg);
   color: var(--color-fifa-text);
   font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+#root main.bg-fifa-bg {
+  background-color: transparent;
 }
 
 button,
@@ -149,4 +199,48 @@ textarea {
   background-clip: text;
   color: transparent;
   animation: shimmer 6s linear infinite;
+}
+
+.surface-glow {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 38%),
+    var(--color-fifa-surface);
+  box-shadow:
+    4px 4px 0 0 var(--color-fifa-border),
+    0 14px 36px rgba(7, 244, 104, 0.025);
+}
+
+.surface-glow-interactive {
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.surface-glow-interactive:hover {
+  border-color: rgba(7, 244, 104, 0.38);
+  box-shadow:
+    5px 5px 0 0 var(--color-fifa-border),
+    0 16px 38px rgba(7, 244, 104, 0.075);
+}
+
+.primary-gradient-button {
+  border: 1px solid rgba(7, 244, 104, 0.7);
+  background: linear-gradient(135deg, #35f99a 0%, #07f468 55%, #00c852 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 8px 24px rgba(7, 244, 104, 0.12);
+  transition: filter 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.primary-gradient-button:hover {
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 10px 30px rgba(7, 244, 104, 0.2);
+  transform: translateY(-1px);
+}
+
+.primary-gradient-button:active {
+  transform: translateY(0);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 5px 14px rgba(7, 244, 104, 0.12);
 }
