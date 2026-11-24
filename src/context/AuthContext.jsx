@@ -30,6 +30,14 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     let mounted = true;
 
+    try {
+      Object.keys(localStorage)
+        .filter((key) => key.startsWith("userData_"))
+        .forEach((key) => localStorage.removeItem(key));
+    } catch (error) {
+      console.error("Failed to clear cached user data:", error);
+    }
+
     // Listen to auth state changes
     const unsubscribe = onAuthStateChanged(
       auth,
@@ -37,25 +45,7 @@ export const AuthProvider = ({ children }) => {
         try {
           // USER LOGGED IN
           if (firebaseUser) {
-            const cacheKey = `userData_${firebaseUser.uid}`;
-
-            // Check local cache first
-            const cachedUserData =
-              localStorage.getItem(cacheKey);
-
-            if (cachedUserData) {
-              // Use cached data instantly — skip the spinner.
-              if (mounted) {
-                setUser(firebaseUser);
-                setUserData(JSON.parse(cachedUserData));
-                setLoading(false);
-              }
-            }
-
-            // Refresh from Firestore in the background (silent if cached)
-            const result = await getUserData(
-              firebaseUser.uid
-            );
+            const result = await getUserData(firebaseUser.uid);
 
             if (
               mounted &&
@@ -63,17 +53,9 @@ export const AuthProvider = ({ children }) => {
               result?.data
             ) {
               setUserData(result.data);
-
-              // Cache locally
-              localStorage.setItem(
-                cacheKey,
-                JSON.stringify(result.data)
-              );
             }
 
-            // If there was no cache, we had to wait for Firestore
-            // before the user could be considered "loaded".
-            if (mounted && !cachedUserData) {
+            if (mounted) {
               setUser(firebaseUser);
               setLoading(false);
             }
@@ -85,12 +67,6 @@ export const AuthProvider = ({ children }) => {
 
             setUser(null);
             setUserData(null);
-
-            // Clear cache
-            const uid = auth.currentUser?.uid;
-            if (uid) {
-              localStorage.removeItem(`userData_${uid}`);
-            }
           }
         } catch (error) {
           console.error(
