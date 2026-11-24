@@ -22,6 +22,13 @@ const GOALKEEPER_STATS = [
 const getValue = (...values) =>
   values.find((value) => value !== undefined && value !== null && value !== "");
 
+// FC Radar Image CDN
+const FC_RADAR_CDN =
+  "https://pub-api.fcradar.gg/cdn/8b5097126aac9190236195ba458784da";
+
+const getPlayerImage = (playerId) =>
+  `${FC_RADAR_CDN}/FC27/heads/${encodeURIComponent(playerId)}.png`;
+
 /* Hard offset shadow takes its color from the token via shadow-fifa-border.
    Needs ~4px of free space to the right and below so it isn't clipped. */
 const BASE =
@@ -31,20 +38,48 @@ const INTERACTIVE =
   "cursor-pointer hover:-translate-x-px hover:-translate-y-px hover:shadow-[5px_5px_0_0] active:translate-x-1 active:translate-y-1 active:shadow-[0_0_0_0]";
 
 const PlayerCard = ({ player, onClick }) => {
-  const [failedId, setFailedId] = useState(null);
+  const [imageStatus, setImageStatus] = useState(null);
+
   const playerId = String(player?.ID ?? player?.id ?? "").trim();
+  const imageStage =
+    imageStatus?.playerId === playerId ? imageStatus.stage : "cdn";
+
   const playerName =
     player?.Name?.trim() ||
     player?.name?.trim() ||
     player?.common_name?.trim() ||
     [player?.first_name, player?.last_name].filter(Boolean).join(" ") ||
     "Unknown player";
+
   const position = getValue(player?.Position, player?.position) || "—";
   const overall = getValue(player?.Overall, player?.overall) ?? "—";
+
   const stats =
-    String(position).toUpperCase() === "GK" ? GOALKEEPER_STATS : STATS;
-  const photoFailed = failedId === playerId;
+    String(position).toUpperCase() === "GK"
+      ? GOALKEEPER_STATS
+      : STATS;
+
   const Tag = onClick ? "button" : "div";
+
+  // CDN first, existing local PNG second
+  const imageSrc =
+    imageStage === "cdn"
+      ? playerId
+        ? getPlayerImage(playerId)
+        : null
+      : imageStage === "local"
+        ? playerId
+          ? `/player_photos/${playerId}.png`
+          : null
+        : null;
+
+  const handleImageError = () => {
+    if (imageStage === "cdn") {
+      setImageStatus({ playerId, stage: "local" });
+    } else {
+      setImageStatus({ playerId, stage: "failed" });
+    }
+  };
 
   return (
     <Tag
@@ -53,14 +88,15 @@ const PlayerCard = ({ player, onClick }) => {
     >
       {/* Photo */}
       <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-fifa-elevated text-fifa-text-muted">
-        {photoFailed ? (
+        {!imageSrc || imageStage === "failed" ? (
           <User size={20} aria-hidden="true" />
         ) : (
           <img
-            src={`/player_photos/${playerId}.png`}
+            src={imageSrc}
             alt={playerName}
             loading="lazy"
-            onError={() => setFailedId(playerId)}
+            decoding="async"
+            onError={handleImageError}
             className="h-full w-full object-cover object-top"
           />
         )}
@@ -72,6 +108,7 @@ const PlayerCard = ({ player, onClick }) => {
           <p className="truncate font-[manrope] text-[15px] font-semibold tracking-tight text-fifa-text">
             {playerName}
           </p>
+
           <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-fifa-text-muted">
             {position}
           </span>
@@ -86,6 +123,7 @@ const PlayerCard = ({ player, onClick }) => {
               >
                 {label}
               </dt>
+
               <dd className="text-sm font-normal leading-none tabular-nums text-fifa-text">
                 {getValue(player?.[key], player?.[csvKey]) ?? "—"}
               </dd>

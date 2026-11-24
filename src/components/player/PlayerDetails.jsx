@@ -68,6 +68,12 @@ const STATS = [
 const PANEL =
   "rounded-2xl border-2 border-fifa-border bg-fifa-surface shadow-[4px_4px_0_0] shadow-fifa-border";
 
+const FC_RADAR_CDN =
+  "https://pub-api.fcradar.gg/cdn/8b5097126aac9190236195ba458784da";
+
+const getPlayerImage = (playerId) =>
+  `${FC_RADAR_CDN}/FC27/heads/${encodeURIComponent(playerId)}.png`;
+
 /* label + value on one line, thin bar underneath */
 const StatItem = ({ label, value }) => {
   const pct = Math.min(100, Math.max(0, Number(value)));
@@ -98,7 +104,11 @@ const PlayerDetails = () => {
   const navigate = useNavigate();
   const player =
     location.state?.player || JSON.parse(localStorage.getItem("player")) || null;
-  const [imgFailed, setImgFailed] = useState(false);
+  const [imageStatus, setImageStatus] = useState(null);
+
+  const playerId = String(player?.ID ?? player?.id ?? "").trim();
+  const imageStage =
+    imageStatus?.playerId === playerId ? imageStatus.stage : "cdn";
 
   useEffect(() => {
     if (location.state?.player) {
@@ -136,6 +146,24 @@ const PlayerDetails = () => {
     value: player[stat.key] ?? player[stat.alt],
   })).filter(({ value }) => value !== undefined && !isNaN(value));
 
+  const imageSrc =
+    imageStage === "cdn"
+      ? playerId
+        ? getPlayerImage(playerId)
+        : null
+      : imageStage === "local"
+        ? playerId
+          ? `/player_photos/${playerId}.png`
+          : null
+        : null;
+
+  const handleImageError = () => {
+    setImageStatus({
+      playerId,
+      stage: imageStage === "cdn" ? "local" : "failed",
+    });
+  };
+
   return (
     <main className="min-h-screen w-full bg-fifa-bg text-fifa-text">
       <div className="mx-auto w-full max-w-3xl px-4 py-4 pb-10 sm:px-6 sm:py-8">
@@ -151,14 +179,16 @@ const PlayerDetails = () => {
         <section className={`${PANEL} overflow-hidden`}>
           <div className="flex items-center gap-3 p-3 sm:p-4">
             <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-fifa-elevated text-fifa-text-muted">
-              {imgFailed ? (
+              {!imageSrc || imageStage === "failed" ? (
                 <User size={24} aria-hidden="true" />
               ) : (
                 <img
-                  src={`/player_photos/${player.ID}.png`}
-                  alt={player.Name}
+                  src={imageSrc}
+                  alt={player.Name ?? player.name ?? "Player"}
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover object-top"
-                  onError={() => setImgFailed(true)}
+                  onError={handleImageError}
                 />
               )}
             </span>
